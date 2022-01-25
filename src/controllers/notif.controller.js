@@ -148,16 +148,23 @@ exports.createNotif = async (req, res) => {
             .then((Datas) => {
                 const message = "Notifications activées";
                 res.json({ statut: true, Data: Datas, message });
+                console.log(project)
             })
             .catch((error) => {
                 const message =
                     "un problème a été détecté lors de la création de votre abonnement. Réessayez dans quelques instants Svp";
                 res.status(500).json({ statut: false, message, error: error });
-            });
+            }); 
 
     } else {
         message = 'Notifications déjà activées'
+        //res.json({ statut: true, Data: [], message: message });
+        if ( message = 'Notifications déjà activées') {
+            message = 'Notifications Desactivées';
+            
+        }
         res.json({ statut: true, Data: [], message: message });
+        console.log(project)
     }
 
 
@@ -176,8 +183,10 @@ exports.updateNotif = async (req, res) => {
         statut: req.body.statut
     }
     project = await abonnements.findAndCountAll({ where: { userId: req.body.userId } })
+    console.log(project)
     // console.log(project)
     if (project.count != 0) {
+        console.log(project)
         project['rows'].forEach(element => {
             AbonnementService.updateabonnements(element.id, dataP)
                 .then((Datas) => {
@@ -189,6 +198,7 @@ exports.updateNotif = async (req, res) => {
                     res.status(500).json({ statut: false, message, error: error });
                 });
         });
+        console.log(project)
     }
     else {
         const message = `Aucune modification n'a été effectué car l'utilisateur n'a pas activé les notifications`;
