@@ -51,8 +51,8 @@ exports.create_Commande = async (req, res) => {
                 .then((Datas) => {
                     const message = "Votre commande a été crée.";
                     // Recherche de l'utilisateur
-                    // console.log("Datas.id:"+Datas.id);
-                    // console.log("Datas.userId:"+Datas.userId);
+                     console.log("Datas.id:"+Datas.id);
+                     console.log("Datas.userId:"+Datas.userId);
                     // user.findOne() ???
                     // user.findByPk(Datas.userId).then(result => {
                     //     // console.log("UserMagasin:"+result.magasinId);
@@ -93,10 +93,17 @@ exports.create_Lignecommande = async (req, res) => {
     MisADispo.getProduitDispo(id)
         .then((data) => {
             let qt = data.dataValues.quantiteActuel;
-            /*    if (qt > 0) {
-               
-                 if (qt > parseInt(ligneCommandes.quantite)) {*/
+            console.log(qt)
+                if (qt > 0) { 
+                    const message = `un problème est survenu lors de la création de votre commande.`;
+                }
+               else {
+                //if (qt > parseInt(ligneCommandes.quantite)) {
             let qti = parseInt(qt) - parseInt(ligneCommandes.quantite);
+            console.info(qt)
+            console.info(qti)
+//controle ici
+
             Dispo.quantiteActuel = qti;
             MisADispo.updateProduitDispo(id, Dispo)
                 .then((datamisea) => {
@@ -106,6 +113,8 @@ exports.create_Lignecommande = async (req, res) => {
                         .then((Data) => {
                             const message = "Votre commande a été transmise.";
                             res.json({ statut: true, message });
+                            console.info(qt)
+                            console.info(qti)
                         })
                         .catch((error) => {
                             const message = `un problème est survenu lors de la création de votre commande.`;
@@ -119,11 +128,18 @@ exports.create_Lignecommande = async (req, res) => {
                     const message = `problème pendant le processus de modification des quantité. Réessayez dans quelques instants svp.`;
                     res.status(500).json({ statut: false, message, error });
                 })
-            /*  }
+            
+            
+                    //zone probleme
+
+              }
+              /*
       else {
+        console.info(qt)
+        console.info(qti)
       const message =`La quantité du produit ${data.dataValues.libelle} demandée est supérieure à la quantité restante`;
 
-        commanndeService.deleteCommand(ligneCommandes.commandeId)
+        commandeService.deleteCommand(ligneCommandes.commandeId)
           .then((Datas) => {
             res.status(500).json({ statut: false, message });
           })
@@ -131,14 +147,13 @@ exports.create_Lignecommande = async (req, res) => {
             const message = "la commande n'a pas pu être supprimé.";
             res.status(500).json({ statut: false, message, error: error });
           });
-    
-   
-    }
 
+    }
+/*
     }else {
         const message =`Le produit ${data.dataValues.libelle}  demandé n'est plus disponible`;
 
-        commanndeService.deleteCommand(ligneCommandes.commandeId)
+        commandeService.deleteCommand(ligneCommandes.commandeId)
         .then((Datas) => {
           res.status(500).json({ statut: false, message });
         }) 

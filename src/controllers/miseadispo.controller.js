@@ -306,12 +306,14 @@ exports.getIbyproduit = async(req, res) => {
                 message: "Erreur. Veuillez remplir tous les champs obligatoires ",
             });
     }
-
+    quant= req.query.quantiteActuel
     id = req.query.id
     let idproduit = parseInt(id)
+    let quantProduit = parseInt(quant)
     DetailProduitMAg(idproduit).then(resultat => {
         if (resultat.length > 0) {
-            const message = `produit dispo du jour.`;
+            console.log(resultat.length);
+            const message = `produit dispo du jour.` + resultat.length + " " + idproduit + " " + quantProduit;
 
             res.json({ statut: true, message, data: resultat });
         } else {
