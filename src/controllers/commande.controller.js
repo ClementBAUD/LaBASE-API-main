@@ -81,42 +81,44 @@ exports.create_Lignecommande = async (req, res) => {
             message: "Erreur. Veuillez remplir tous les champs obligatoires ",
         });
     }
+//////////////////////////////////////////////////////
     const ligneCommandes = {
         quantite: req.body.quantite,
         miseadispoId: req.body.MiseADispoId,
         commandeId: req.body.commandeId,
     };
+//////////////////////////////////////////////////////
     const Dispo = {
-        quantiteActuel: 0,
+        quantiteActuel: 0, //Initialise a 0
     };
+//////////////////////////////////////////////////////
     let id = parseInt(req.body.MiseADispoId)
+//////////////////////////////////////////////////////
     MisADispo.getProduitDispo(id)
         .then((data) => {
             let qt = data.dataValues.quantiteActuel;
             console.log(qt)
                 if (qt > 0) { 
                     const message = `un problème est survenu lors de la création de votre commande.`;
-                }
-               else {
-                //if (qt > parseInt(ligneCommandes.quantite)) {
-            let qti = parseInt(qt) - parseInt(ligneCommandes.quantite);
-            console.info(qt)
-            console.info(qti)
-//controle ici
+                }else {
+                    if (qt >= parseInt(ligneCommandes.quantite)) {
+                    let qti = parseInt(qt) - parseInt(ligneCommandes.quantite);
 
-            Dispo.quantiteActuel = qti;
-            MisADispo.updateProduitDispo(id, Dispo)
-                .then((datamisea) => {
-                    // console.log(datamisea)
-                    ligneCommande
-                        .create(ligneCommandes)
-                        .then((Data) => {
-                            const message = "Votre commande a été transmise.";
-                            res.json({ statut: true, message });
-                            console.info(qt)
-                            console.info(qti)
-                        })
-                        .catch((error) => {
+                //console.info(qt)
+                //console.info(qti)
+                Dispo.quantiteActuel = qti;
+                MisADispo.updateProduitDispo(id, Dispo)
+                    .then((datamisea) => {
+                        // console.log(datamisea)
+                        ligneCommande
+                            .create(ligneCommandes)
+                            .then((Data) => {
+                                const message = "Votre commande a été transmise.";
+                                res.json({ statut: true, message });
+                                console.info("qt : " +qt)
+                                console.info("qti : "+ qti)
+                            })
+                            .catch((error) => {
                             const message = `un problème est survenu lors de la création de votre commande.`;
                             res
                                 .status(500)
@@ -133,8 +135,8 @@ exports.create_Lignecommande = async (req, res) => {
                     //zone probleme
 
               }
-              /*
-      else {
+              
+    else {
         console.info(qt)
         console.info(qti)
       const message =`La quantité du produit ${data.dataValues.libelle} demandée est supérieure à la quantité restante`;
@@ -147,9 +149,10 @@ exports.create_Lignecommande = async (req, res) => {
             const message = "la commande n'a pas pu être supprimé.";
             res.status(500).json({ statut: false, message, error: error });
           });
-
     }
-/*
+               
+
+    /*
     }else {
         const message =`Le produit ${data.dataValues.libelle}  demandé n'est plus disponible`;
 
@@ -161,8 +164,8 @@ exports.create_Lignecommande = async (req, res) => {
           const message = "la commande n'a pas pu être supprimé.";
           res.status(500).json({ statut: false, message, error: error });
         });
-       
-      }*/
+       */
+      }
 
         })
         .catch((error) => {
@@ -219,12 +222,12 @@ exports.update_Commande = async (req, res) => {
 };
 
 exports.delete_commande = async (req, res) => {
-    if (!req.body.idcommade) {
+    if (!req.body.idcommande) {
         return res.status(400).json({
             message: "Erreur. Merci de remplir tous les champs obligatoires ",
         });
     }
-    let id = parseInt(req.body.idcommade);
+    let id = parseInt(req.body.idcommande);
     commandeService.deleteCommand(id)
         .then((Datas) => {
             const message = "la commande  à été supprimé .";
