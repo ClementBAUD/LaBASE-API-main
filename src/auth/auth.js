@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 
 module.exports = (req, res, next) => {
     const authorizationHeader = req.headers.authorization
-
+    //console.log(req.headers)
     if (!authorizationHeader) {
         const message = `Vous n'avez pas fourni de jeton d'authentification. Ajoutez-en un dans l'en-tête de la requête.`
         return res.status(401).json({statut:"error",message })

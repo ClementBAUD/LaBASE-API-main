@@ -74,92 +74,6 @@ exports.create_Commande = async (req, res) => {
         });
 };
 
-
-exports.create_TabLignecommande = async (req, res) => {
-    console.log("TOTO")
-    //console.log(req.body)
-    let Tableo = new Array()
-    Tableo = req.body
-    console.log(Tableo)
-    let NumCommande = parseInt(req.body.NumCommande)
-    console.log(Ide)
-
-    if (Tableo.length == 0 || isNaN(NumCommande) ) { //
-        return res.status(400).json({
-            message: "Erreur. Veuillez remplir tous les champs obligatoires ",
-        });
-}
-else {
-    console.log("Tableau okay")
-    Tableo.forEach(element => {
-
-    const ligneCommandes = {
-            quantite: element.quantite,
-            miseadispoId: element.MiseADispoId,
-            NumCommande: NumCommande,
-        };   
-
-        const Dispo = {
-            quantiteActuel: 0, //Initialise a 0
-        };
-    //////////////////////////////////////////////////////
-        let id = parseInt(element.MiseADispoId)
-
-        MisADispo.getProduitDispo(id)
-        .then((data) => {
-            let qt = data.element.quantiteActuel; //data.dataValues.quantiteActuel;
-            console.log("quantité actuel du produit",qt)
-                    if (qt >= parseInt(tabligneCommandes.quantite)) {
-                        let qti = parseInt(qt) - parseInt(tabligneCommandes.quantite);
-                        console.log("quantité actuel du produit apres la commande", qti)
-                        if (qti <= 0) {
-                            console.log("quantité actuelle est inferieure à zero")
-                        }
-                Dispo.quantiteActuel = qti;
-                MisADispo.updateProduitDispo(id, Dispo)
-                    .then((datamisea) => {
-                        ligneCommande
-                            .create(tabligneCommandes)
-                            .then((Data) => {
-                                const message = "Votre commande a été transmise.";
-                                res.json({ statut: true, message });
-                            })
-                            .catch((error) => {
-                            const message = `un problème est survenu lors de la création de votre commande.`;
-                            res
-                                .status(500)
-                                .json({ statut: false, message, error: error });
-                        });
-
-                })
-                .catch((error) => {
-                    const message = `problème pendant le processus de modification des quantité. Réessayez dans quelques instants svp.`;
-                    res.status(500).json({ statut: false, message, error });
-                })
-                    //zone probleme
-              }
-              
-    else {
-      const message =`La quantité du produit ${data.dataValues.libelle} demandée est supérieure à la quantité restante`;
-        commandeService.deleteCommand(tabligneCommandes.commandeId)
-          .then((Datas) => {
-            res.status(400).json({ statut: false, message });
-          })
-          .catch((error) => {
-            const message = "la commande n'a pas pu être supprimé.";
-            res.status(500).json({ statut: false, message, error: error });
-          });
-    }
-        })
-        .catch((error) => {
-            const message = `problème pendant le processus de commande. Réessayez dans quelques instants svp.`;
-            res.status(500).json({ statut: false, message, error });
-        });
-    });
-    };
-}
-
-
 // gestion des commandes avec les produits 
 exports.create_Lignecommande = async (req, res) => {
     if (!req.body.quantite || !req.body.MiseADispoId || !req.body.commandeId) {
@@ -167,20 +81,12 @@ exports.create_Lignecommande = async (req, res) => {
             message: "Erreur. Veuillez remplir tous les champs obligatoires ",
         });
     }
-
-
 //////////////////////////////////////////////////////
     const ligneCommandes = {
         quantite: req.body.quantite,
         miseadispoId: req.body.MiseADispoId,
         commandeId: req.body.commandeId,
     };
-
-    const tabligneCommandes = {
-        tab: req.body.tab
-    };
-
-
 //////////////////////////////////////////////////////
     const Dispo = {
         quantiteActuel: 0, //Initialise a 0
@@ -191,24 +97,26 @@ exports.create_Lignecommande = async (req, res) => {
     MisADispo.getProduitDispo(id)
         .then((data) => {
             let qt = data.dataValues.quantiteActuel;
-            console.log("quantité actuel du produit",qt)
-                    if (qt >= parseInt(tabligneCommandes.quantite)) {
-                        let qti = parseInt(qt) - parseInt(tabligneCommandes.quantite);
-                        console.log("quantité actuel du produit apres la commande", qti)
-                        if (qti <= 0) {
-                            console.log("quantité actuelle est inferieure à zero")
-                        }
+            console.log(qt)
+                if (qt > 0) { 
+                    const message = `un problème est survenu lors de la création de votre commande.`;
+                }else {
+                    if (qt >= parseInt(ligneCommandes.quantite)) {
+                    let qti = parseInt(qt) - parseInt(ligneCommandes.quantite);
+
+                //console.info(qt)
+                //console.info(qti)
                 Dispo.quantiteActuel = qti;
                 MisADispo.updateProduitDispo(id, Dispo)
                     .then((datamisea) => {
                         // console.log(datamisea)
                         ligneCommande
-                            .create(tabligneCommandes)
+                            .create(ligneCommandes)
                             .then((Data) => {
                                 const message = "Votre commande a été transmise.";
                                 res.json({ statut: true, message });
-                                //console.info("qt : " +qt)
-                                //console.info("qti : "+ qti)
+                                console.info("qt : " +qt)
+                                console.info("qti : "+ qti)
                             })
                             .catch((error) => {
                             const message = `un problème est survenu lors de la création de votre commande.`;
@@ -222,25 +130,50 @@ exports.create_Lignecommande = async (req, res) => {
                     const message = `problème pendant le processus de modification des quantité. Réessayez dans quelques instants svp.`;
                     res.status(500).json({ statut: false, message, error });
                 })
+            
+            
                     //zone probleme
+
               }
               
     else {
+        console.info(qt)
+        console.info(qti)
       const message =`La quantité du produit ${data.dataValues.libelle} demandée est supérieure à la quantité restante`;
-        commandeService.deleteCommand(tabligneCommandes.commandeId)
+
+        commandeService.deleteCommand(ligneCommandes.commandeId)
           .then((Datas) => {
-            res.status(400).json({ statut: false, message });
+            res.status(500).json({ statut: false, message });
           })
           .catch((error) => {
             const message = "la commande n'a pas pu être supprimé.";
             res.status(500).json({ statut: false, message, error: error });
           });
     }
+               
+
+    /*
+    }else {
+        const message =`Le produit ${data.dataValues.libelle}  demandé n'est plus disponible`;
+
+        commandeService.deleteCommand(ligneCommandes.commandeId)
+        .then((Datas) => {
+          res.status(500).json({ statut: false, message });
+        }) 
+        .catch((error) => {
+          const message = "la commande n'a pas pu être supprimé.";
+          res.status(500).json({ statut: false, message, error: error });
+        });
+       */
+      }
+
         })
         .catch((error) => {
             const message = `problème pendant le processus de commande. Réessayez dans quelques instants svp.`;
             res.status(500).json({ statut: false, message, error });
         });
+
+
 };
 
 /**
