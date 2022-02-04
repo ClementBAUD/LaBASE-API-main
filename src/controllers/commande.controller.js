@@ -16,6 +16,7 @@ const commandeService = require("../services/commande.services");
 const ligneCommandeService = require("../services/lignecommande.services");
 const MisADispo = require("../services/MisADispo.services");
 const { EnvoiMailCreationCommande } = require("../services/mail.services");
+const { table } = require("console");
 
 /**
  * méthode de création des commandes
@@ -25,7 +26,7 @@ const { EnvoiMailCreationCommande } = require("../services/mail.services");
 exports.create_Commande = async (req, res) => {
     if (!req.body.heureRecuperation || !req.body.userId) {
         return res.status(400).json({
-            message: "Erreur. Veuillez remplir tous les champs obligatoires ",
+            message: "Erreur. Veuillez remplir tous les champs obligatoires creation commande ",
         });
     }
     let codeG = crypto.randomBytes(2).toString("hex");
@@ -51,12 +52,12 @@ exports.create_Commande = async (req, res) => {
                 .then((Datas) => {
                     const message = "Votre commande a été crée.";
                     // Recherche de l'utilisateur
-                     console.log("Datas.id:"+Datas.id);
-                     console.log("Datas.userId:"+Datas.userId);
+                    console.log("Datas.id:" + Datas.id);
+                    console.log("Datas.userId:" + Datas.userId);
                     // user.findOne() ???
                     // user.findByPk(Datas.userId).then(result => {
                     //     // console.log("UserMagasin:"+result.magasinId);
-                        EnvoiMailCreationCommande(Datas.userId, code, dataCom.heureRecuperation);
+                    EnvoiMailCreationCommande(Datas.userId, code, dataCom.heureRecuperation);
                     // })
 
                     res.json({ statut: true, Data: Datas, message });
@@ -75,96 +76,124 @@ exports.create_Commande = async (req, res) => {
 };
 
 
-exports.create_TabLignecommande = async (req, res) => {
-    console.log("TOTO")
+
+
+
+
+
+exports.create_TabLignecommande2 = async (req, res) => {
     //console.log(req.body)
     let Tableo = new Array()
-    Tableo = req.body
+    Tableo = req.body.tab
+    console.log("print tab")
     console.log(Tableo)
     let NumCommande = parseInt(req.body.NumCommande)
-    console.log(Ide)
+    console.log("Numéro Commande")
+    console.log(NumCommande)
+    console.log("taille tableau")
+    console.log(Tableo.length)
 
-    if (Tableo.length == 0 || isNaN(NumCommande) ) { //
+    if (Tableo.length == 0 || isNaN(NumCommande)) { //
         return res.status(400).json({
-            message: "Erreur. Veuillez remplir tous les champs obligatoires ",
+            message: "Erreur. Veuillez remplir tous les champs obligatoires tableau ",
         });
-}
-else {
-    console.log("Tableau okay")
-    Tableo.forEach(element => {
+    } else {
+        console.log("Tableau okay")
 
-    const ligneCommandes = {
-            quantite: element.quantite,
-            miseadispoId: element.MiseADispoId,
-            NumCommande: NumCommande,
-        };   
+        Tableo.forEach(async element => {
+            ///////////////////////////////////////////////////
+            const tabligneCommandes = {
+                quantite: element.Quantite,
+                miseadispoId: element.id_prodDispo,
+                commandeId: NumCommande,
+            };
+            ///////////////////////////////////////////////////
+            console.log("tab élément")
+            console.log(tabligneCommandes)
+            ///////////////////////////////////////////////////
+            const Dispo = {
+                quantiteActuel: 0, //Initialise a 0
+            };
+            //////////////////////////////////////////////////////
+            let id = parseInt(tabligneCommandes.miseadispoId)
+            ///////////////////////////////////////////////////
+            console.log("id")
+            console.log(id)
+            ///////////////////////////////////////////////////
+            console.log("MisADispo")
+            console.log("////////")
+            ///////////////////////////////////////////////////
 
-        const Dispo = {
-            quantiteActuel: 0, //Initialise a 0
-        };
-    //////////////////////////////////////////////////////
-        let id = parseInt(element.MiseADispoId)
 
-        MisADispo.getProduitDispo(id)
-        .then((data) => {
-            let qt = data.element.quantiteActuel; //data.dataValues.quantiteActuel;
-            console.log("quantité actuel du produit",qt)
+            //process.on('unhandledRejection', (reason, p) => {
+            //  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+            // application specific logging, throwing an error, or other logic here
+
+
+            MisADispo.getProduitDispo(id)
+                .then(async (data) => {
+                    let qt = data.quantiteActuel; //data.dataValues.quantiteActuel;
+                    console.log("quantité actuel du produit")
+                    console.log(qt)
+                    console.log("quantité commandé")
+                    console.log(tabligneCommandes.quantite)
+                    ///////////////////////////////////////////////////
                     if (qt >= parseInt(tabligneCommandes.quantite)) {
                         let qti = parseInt(qt) - parseInt(tabligneCommandes.quantite);
                         console.log("quantité actuel du produit apres la commande", qti)
-                        if (qti <= 0) {
-                            console.log("quantité actuelle est inferieure à zero")
-                        }
-                Dispo.quantiteActuel = qti;
-                MisADispo.updateProduitDispo(id, Dispo)
-                    .then((datamisea) => {
-                        ligneCommande
-                            .create(tabligneCommandes)
-                            .then((Data) => {
-                                const message = "Votre commande a été transmise.";
-                                res.json({ statut: true, message });
+                        Dispo.quantiteActuel = qti;
+                        console.log(id, Dispo.quantiteActuel)
+                        console.log(Dispo)
+                        ///////////////////////////////////////////////////                            
+                        await MisADispo.updateProduitDispo(id, Dispo)
+                            .then(async (datamisea) => {
+                                await ligneCommande
+                                    .create(tabligneCommandes)
+                                    .then((Data) => {
+                                        const message = "Votre commande a été transmise.";
+                                        res.json({ statut: true, message });
+                                    })
+                                    .catch((error) => {
+                                        const message = `un problème est survenu lors de la création de votre commande.`;
+                                        res
+                                            .status(500)
+                                            .json({ statut: false, message, error: error });
+                                    });
                             })
                             .catch((error) => {
-                            const message = `un problème est survenu lors de la création de votre commande.`;
-                            res
-                                .status(500)
-                                .json({ statut: false, message, error: error });
-                        });
-
+                                const message = `problème pendant le processus de modification des quantité. Réessayez dans quelques instants svp.`;
+                                res.status(500).json({ statut: false, message, error });
+                            });
+                    } else {
+                        console.log(`La quantitée du produit ${data.dataValues.libelle} demandée est supérieure à la quantitée restante`)
+                        const message = `La quantitée du produit ${data.dataValues.libelle} demandée est supérieure à la quantitée restante`;
+                        await commandeService.deleteCommand(tabligneCommandes.commandeId)
+                            .then(async (Datas) => {
+                                await res.status(500).json({ statut: false, message });
+                            })
+                            .catch((error) => {
+                                const message = "la commande n'a pas pu être supprimé.";
+                                res.status(500).json({ statut: false, message, error: error });
+                            });
+                    }
                 })
                 .catch((error) => {
-                    const message = `problème pendant le processus de modification des quantité. Réessayez dans quelques instants svp.`;
+                    const message = `problème pendant le processus de commande. Réessayez dans quelques instants svp.`;
                     res.status(500).json({ statut: false, message, error });
-                })
-                    //zone probleme
-              }
-              
-    else {
-      const message =`La quantité du produit ${data.dataValues.libelle} demandée est supérieure à la quantité restante`;
-        commandeService.deleteCommand(tabligneCommandes.commandeId)
-          .then((Datas) => {
-            res.status(400).json({ statut: false, message });
-          })
-          .catch((error) => {
-            const message = "la commande n'a pas pu être supprimé.";
-            res.status(500).json({ statut: false, message, error: error });
-          });
-    }
+                });
+            //.then(Promise.resolve());
         })
-        .catch((error) => {
-            const message = `problème pendant le processus de commande. Réessayez dans quelques instants svp.`;
-            res.status(500).json({ statut: false, message, error });
-        });
-    });
-    };
-}
 
+    }
+};
+
+/*
 
 // gestion des commandes avec les produits 
 exports.create_Lignecommande = async (req, res) => {
     if (!req.body.quantite || !req.body.MiseADispoId || !req.body.commandeId) {
         return res.status(400).json({
-            message: "Erreur. Veuillez remplir tous les champs obligatoires ",
+            message: "Erreur. Veuillez remplir tous les champs obligatoires old ",
         });
     }
 
@@ -203,7 +232,7 @@ exports.create_Lignecommande = async (req, res) => {
                     .then((datamisea) => {
                         // console.log(datamisea)
                         ligneCommande
-                            .create(tabligneCommandes)
+                            .create(ligneCommandes)
                             .then((Data) => {
                                 const message = "Votre commande a été transmise.";
                                 res.json({ statut: true, message });
@@ -242,10 +271,224 @@ exports.create_Lignecommande = async (req, res) => {
             res.status(500).json({ statut: false, message, error });
         });
 };
+*/
 
-/**
- * modifier
- */
+
+
+exports.create_TabLignecommande = async (req, res) => {
+    //console.log(req.body)
+    let Tableo = new Array()
+    Tableo = req.body.tab
+    console.log("print tab")
+    console.log(Tableo)
+    let NumCommande = parseInt(req.body.NumCommande)
+    console.log("Numéro Commande")
+    console.log(NumCommande)
+    console.log("taille tableau")
+    console.log(Tableo.length)
+    let bPretAEnregistrer = true;
+    const Dispo = {
+        quantiteActuel: 1, //Initialise a 0
+    };
+
+
+    if (Tableo.length == 0 || isNaN(NumCommande)) { //
+        return res.status(400).json({
+            message: "Erreur. Veuillez remplir tous les champs obligatoires tableau ",
+        });
+    } else {
+        console.log("Tableau okay")
+
+       
+        let i = 0;
+       
+
+        while (i < Tableo.length && bPretAEnregistrer) {
+            let element = Tableo[i]
+            console.log(element)
+            ///////////////////////////////////////////////////
+            const tabligneCommandes = {
+                quantite: element.Quantite,
+                miseadispoId: element.id_prodDispo,
+                commandeId: NumCommande,
+            };
+            ///////////////////////////////////////////////////
+            console.log("tab élément")
+            console.log(tabligneCommandes)
+            ///////////////////////////////////////////////////
+            
+
+
+            //////////////////////////////////////////////////////
+            let id = parseInt(tabligneCommandes.miseadispoId)
+            ///////////////////////////////////////////////////
+            console.log("id")
+            console.log(id)
+            ///////////////////////////////////////////////////
+            console.log("MisADispo")
+            console.log("////////")
+            ///////////////////////////////////////////////////
+
+
+
+            let qt = Dispo.quantiteActuel
+            //let qti = tabligneCommandes.quantite
+
+
+            console.log("i")
+            console.log(i)
+            console.log("taille")
+            console.log(Tableo.length)
+            console.log("bool")
+            console.log(bPretAEnregistrer)
+            console.log("quantité pris")
+            //console.log(qti)
+            console.log("quantité dispo")
+            console.log(qt)
+
+
+
+
+            //const MAD = await MisADispo.findbyPk(Ligne.MisADispoID)
+
+            // Vérification si QteACommander <= Stock Dispo
+            if (tabligneCommandes.quantite <= qt) {
+                // La quantité est bonne
+                console.log("Tout va bien, on continue");
+            } else {
+                // La quantité est trop élevée
+                bPretAEnregistrer = false;
+                //messErr = "Le produit " + element.libelle + " est en quantité trop élevée";
+            }
+            i++;
+            //console.info("boucle while")
+        }
+    }
+
+
+
+
+
+    if (bPretAEnregistrer) {
+        Tableo.forEach(element => {
+            console.log(element.id_prodDispo)
+            MisADispo.getProduitDispo(element.id_prodDispo)
+                .then((data) => {
+                    let qt = data.quantiteActuel; //data.dataValues.quantiteActuel;
+                    
+                    console.log("quantité actuel du produit")
+                    console.log(qt, element.Quantite)
+                    let qti = qt - element.Quantite;
+                    console.log("quantité actuel du produit apres la commande", qti)
+                    //console.log(qti)
+                    console.log("quantité commandé")
+
+                    ///////////////////////////////////////////////////
+                    /*
+                                    if (qt < parseInt(tabligneCommandes.quantite) ) {
+                                       console.log(`La quantitée du produit ${data.dataValues.libelle} demandée est supérieure à la quantitée restante`)       
+                                        const message =`La quantitée du produit ${data.dataValues.libelle} demandée est supérieure à la quantitée restante`;
+                                        await commandeService.deleteCommand(tabligneCommandes.commandeId)
+                                            .then(async(Datas) => {
+                                                await res.status(500).json({ statut: false, message });
+                                            })
+                                            .catch((error) => {
+                                                const message = "la commande n'a pas pu être supprimé.";
+                                                res.status(500).json({ statut: false, message, error: error });
+                                            }); 
+                                    }*/
+                    //else{
+
+                    //qti = parseInt(qt) - parseInt(tabligneCommandes.quantite);
+                    console.log("quantité actuel du produit apres la commande", qti)
+                    //data.quantiteActuel = qti;
+                    console.log(id, Dispo.quantiteActuel)
+                    console.log(Dispo)
+                    //console.log(element.Dispo)               
+                    //console.log(data.Dispo)  
+                    //console.log(element.data.Dispo)
+                    console.log("iiiiiiiiiiiiiiiiii") 
+                    console.log(element.tabligneCommandes)  
+                    console.log("eeeeeeeeeeeeeeeee")           
+                    ///////////////////////////////////////////////////                            
+                    MisADispo.updateProduitDispo(id, Dispo)
+                        .then(async (datamisea) => {
+                            await ligneCommande
+                                .create(tabligneCommandes)
+                                .then((Data) => {
+                                    const message = "Votre commande a été transmise.";
+                                    res.json({ statut: true, message });
+
+                                })
+                                .catch((error) => {
+                                    const message = `un problème est survenu lors de la création de votre commande.`;
+                                    res
+                                        .status(500)
+                                        .json({ statut: false, message, error: error });
+                                });
+                        })
+                        .catch((error) => {
+                            const message = `problème pendant le processus de modification des quantité. Réessayez dans quelques instants svp.`;
+                            res.status(500).json({ statut: false, message, error });
+                        });
+                    //}
+                })
+                .catch((error) => {
+                    const message = `problème pendant le processus de commande. Réessayez dans quelques instants svp.`;
+                    res.status(500).json({ statut: false, message, error });
+                });
+        })
+
+    }
+    else {
+        Tableo.forEach(element => {
+        console.log(" booléen false.");
+        commandeService.deleteCommand(element.commandeId)
+        })
+
+
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 exports.update_Commande = async (req, res) => {
     //|| !req.body.userId
     if (!req.body.id || !req.body.statutcommandeId) {

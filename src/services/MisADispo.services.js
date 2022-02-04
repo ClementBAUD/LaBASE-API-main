@@ -13,7 +13,7 @@ module.exports = {
 
 async function updateProduitDispo(id, params) {
     const Pdispo = await getProduitDispo(id);
-     // copy params to magasin and save
+
      Object.assign(Pdispo, params);
      await Pdispo.save();
  

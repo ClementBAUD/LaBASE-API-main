@@ -7,7 +7,7 @@ const auth = require('../auth/auth')
 // add function create delete update and testing
 
 router.post('/creation_first', auth, controllerCommande.create_Commande);
-router.post('/ligne_commande', auth, controllerCommande.create_Lignecommande);
+//router.post('/ligne_commande', auth, controllerCommande.create_Lignecommande);
 router.post('/Tab_ligne_commande', auth, controllerCommande.create_TabLignecommande);
 router.post('/update', auth, controllerCommande.update_Commande);
 //delete_commande
