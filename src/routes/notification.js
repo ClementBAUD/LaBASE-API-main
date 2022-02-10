@@ -370,7 +370,7 @@ router.post('/sms', async function(req, res, next) {
     // let api_key="W2KAlinCNIkftZSq5saTchum3ewLbO41"
     // let text="envoie STOP au STOP au XXXXX"
     // if (req.body.message=="ouverture") {
-    //     text ="Vous pouvez dès maintemant réserver vos produits sur votre magasin La B.A.S.E. Envoyer STOP au XXXXX"
+    //     text ="Vous pouvez dès maintenant réserver vos produits sur votre magasin La B.A.S.E. Envoyer STOP au XXXXX"
     // }
     // if (req.body.message=="Rappel") {
     //     text ='Attention, vous avez une commande à récupérer dans votre magasin La B.A.S.E. avant '+req.body.fermeture+'. Envoyer STOP au XXXXX'
@@ -419,10 +419,10 @@ router.post('/sms-all', async function(req, res, next) {
     let text="envoie STOP au XXXXX"
 
     if (req.body.message=="ouverture") {
-        text ="Vous pouvez dès maintemant réserver vos produits sur votre magasin La B.A.S.E. labase-ba.fr/home. Envoyer STOP au XXXXX"
+        text ="Vous pouvez dès maintenant réserver vos produits sur votre magasin La B.A.S.E. labase-ba.fr. Envoyer STOP au XXXXX"
     }
     if (req.body.message=="Rappel") {
-        text ='Attention, vous avez une commande à récupérer dans votre magasin La B.A.S.E. labase-ba.fr/home avant '+req.body.fermeture+'. Envoyer STOP au XXXXX'
+        text ='Attention, vous avez une commande à récupérer dans votre magasin La B.A.S.E. labase-ba.fr avant '+req.body.fermeture+'. Envoyer STOP au XXXXX'
     }
 
     if (project['count']>0) {

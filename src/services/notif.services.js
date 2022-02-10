@@ -7,7 +7,7 @@ const { resultatSMS } = require("../db/requete.admin");
 const user_login="communication@boucheries-andre.fr";
 const api_key="W2KAlinCNIkftZSq5saTchum3ewLbO41";
 const msgText=". Envoie STOP au XXXXX";
-const msgOuverture="Vous pouvez dès maintemant réserver vos produits sur votre magasin La B.A.S.E. Envoyer STOP au XXXXX";
+const msgOuverture="Vous pouvez dès maintenant réserver vos produits sur votre magasin La B.A.S.E. Envoyer STOP au XXXXX";
 const msgRappel="Attention, vous avez une commande à récupérer dans votre magasin La B.A.S.E. Envoyer STOP au XXXXX";
 
 module.exports = {
