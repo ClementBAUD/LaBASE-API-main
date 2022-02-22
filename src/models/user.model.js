@@ -61,6 +61,11 @@ module.exports = (sequelize, DataTypes) => {
         tel:{
             type: DataTypes.STRING,
             allowNull: true,
+        },
+        restreint:{
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: false,
         }
 
     });

@@ -40,6 +40,11 @@ router.put('/certificat', controllerUser.updateCertificat);
 
 // update statut compte etudians 
 router.put('/updateStatutComptes', auth, controllerUser.updateStatutComptes);
+
+//restrin
+router.post('/restrinUser', auth, controllerUser.restrinUser);
+
+
 //delete
 router.delete('/deleteUser', auth, controllerUser.deleteUser);
 

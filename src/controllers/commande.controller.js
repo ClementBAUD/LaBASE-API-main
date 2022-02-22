@@ -17,6 +17,7 @@ const ligneCommandeService = require("../services/lignecommande.services");
 const MisADispo = require("../services/MisADispo.services");
 const { EnvoiMailCreationCommande } = require("../services/mail.services");
 const { table } = require("console");
+const { nextTick } = require("process");
 
 /**
  * méthode de création des commandes
@@ -75,97 +76,54 @@ exports.create_Commande = async (req, res) => {
 
 
 
-exports.create_TabLignecommande = async (req, res) => {
-    let Tableo = new Array()
-    Tableo = req.body.tab
-    let NumCommande = parseInt(req.body.NumCommande)//On Recupère le num commande
-    let bPretAEnregistrer = true;//Initialisation du booléen
-    const Dispo = {
-        quantiteActuel: 0, //Initialise a 0
-    };
+
+
+exports.create_TabLignecommande = async (req, res, next) => {
+//variable
+let Tableo = new Array()
+Tableo = req.body.tab
+let NumCommande = parseInt(req.body.NumCommande)//On Recupère le num commande
+Tableo.forEach(async element => {
+const ligneCommandes = {
+    quantite: element.Quantite,
+    miseadispoId: element.id_prodDispo,
+    commandeId: NumCommande,
+};
+let idProduit = element.id_prodDispo;
 ///////////////////////////////////////////////////
-//Vérification Taille des données non vide et présence d'un numéro de commande.
-    if (Tableo.length == 0 || isNaN(NumCommande)) { //
-        return res.status(400).json({
-            message: "Erreur. Veuillez remplir tous les champs obligatoires tableau ",
-        });
-    } 
-    ///////////////////////////////////////////////////
-    else {
-        let i = 0;
-        while (i < Tableo.length && bPretAEnregistrer) {
-            let element = Tableo[i]
-            ///////////////////////////////////////////////////
-            const tabligneCommandes = {
-                quantite: element.Quantite,//Permet de recuperer la quanttite du produit
-                miseadispoId: element.id_prodDispo, //Permet de recuperer l'id du produit
-                commandeId: NumCommande, //permet de recuperer le num commande
-            };
-            ///////////////////////////////////////////////////
-            let id = parseInt(tabligneCommandes.miseadispoId)
-            ///////////////////////////////////////////////////
-            let qt = element.quantiteActuel
-            // Vérification si QteACommander <= Stock Dispo
-            if (tabligneCommandes.quantite <= qt) {// La quantité est bonne
-                //bPretAEnregistrer = true;
-            } else { //Quantité pas bonne
-                if (tabligneCommandes.quantite > qt) {//On verfie quel produit est en quantité faible
-                    bPretAEnregistrer = false;//On passe le booléen à false pour éviter la suite de l'execution
-                    const message = `La quantitée du produit ${element.libelle} demandée est supérieure à la quantitée restante`;// On affiche le message pour l'utilisaeur
-                    await commandeService.deleteCommand(tabligneCommandes.commandeId)//Supression commande
-                        .then(async (Datas) => {
-                            await res.status(500).json({ statut: false, message });
-                        })
-                        .catch((error) => {
-                            const message = "la commande n'a pas pu être supprimé.";
-                            res.status(500).json({ statut: false, message, error: error });
-                        });
-                }
-            }
-            i++; //On incrémente pour parcourir le tableau
-        }
-    }
-///////////////////////////////////////////////////
-///////////////////////////////////////////////////
-///////////////////////////////////////////////////
-    if (bPretAEnregistrer) {
-        Tableo.forEach(async element => {
-            const ligneCommandes = {
-                quantite: element.Quantite,
-                miseadispoId: element.id_prodDispo,
-                commandeId: NumCommande,
-            };
-            let idProduit = element.id_prodDispo;
-            await MisADispo.getProduitDispo(idProduit)
-                .then(async(data) => {
-                    let quantActuel = data.quantiteActuel; 
-                    let quantPris = ligneCommandes.quantite;
-                    let quantApresCommande = quantActuel - quantPris;
-                    let paramsQuant = {quantiteActuel:quantApresCommande}
-                    await MisADispo.updateProduitDispo(idProduit, paramsQuant)
-                        .then(async(datamisea) => {
-                            ligneCommande
-                                .create(ligneCommandes)
-                                .then((Data) => {
-                                    const message = "Votre commande a été transmise.";
-                                    res.json({ statut: true, message });
-                                })
-                                .catch((error) => {
-                                    const message = "La ligne de commande n'a pas pu être créée.";
-                                });
-                        })
-                        .catch((error) => {
-                            const message = "Impossible d'enregistrer la commande car le stock n'a pas pu être mis à jour.";
-                            res.status(500).json({ statut: false, message, error });
-                        });
+await MisADispo.getProduitDispo(idProduit)
+    .then(async(data) => {
+        let quantActuel = data.quantiteActuel; 
+        let quantPris = ligneCommandes.quantite;
+        let quantApresCommande = quantActuel - quantPris;
+        let paramsQuant = {quantiteActuel:quantApresCommande}
+        await MisADispo.updateProduitDispo(idProduit, paramsQuant)
+            .then(async(datamisea) => {
+                ligneCommande
+                .create(ligneCommandes)
+                .then((Data) => {
+                    const message = "Votre commande a été transmise.";
+                    res.json({ statut: true, message });
                 })
                 .catch((error) => {
-                    const message = "Impossible d'enregistrer la commande car le stock n'a pas pu être récupérée.";
-                    res.status(500).json({ statut: false, message, error });
+                    const message = "La ligne de commande n'a pas pu être créée.";
+                    });
+            })
+            .catch((error) => {
+                const message = "Impossible d'enregistrer la commande car le stock n'a pas pu être mis à jour.";
+                res.status(500).json({ statut: false, message, error });
                 });
-        })
-    } 
+    })
+    .catch((error) => {
+        const message = "Impossible d'enregistrer la commande car le stock n'a pas pu être récupérée.";
+        res.status(500).json({ statut: false, message, error });
+    });
+    })
 }
+
+
+
+
 
 exports.update_Commande = async (req, res) => {
     //|| !req.body.userId

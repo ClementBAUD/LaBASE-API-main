@@ -53,7 +53,7 @@ exports.NbCommandeNonRecup = async(req, res) => {
                 }
             })
             .then(commande => {
-                console.log(commande)
+                //console.log(commande)
                 if (!commande) {
                     const message = `un petit problème a été détecté 1 .`
                     res.status(500).json({ "statut": false, message })
@@ -270,7 +270,7 @@ exports.NbProducommanDay = async(req, res) => {
                 res.status(500).json({ "statut": false, message })
         
             } else {
-                console.log(stCommande.id)
+                //console.log(stCommande.id)
         
                     nbreComProdDay(idMag,stCommande.id).then(resulat => {
         
@@ -643,6 +643,7 @@ exports.NombreProdAdmin = async(req, res) => {
 
 exports.nbreEtudiantEnAttent = async(req, res) => {
     //  const idUser = parseInt(req.body.idUser)
+    console.log("on regarde les étudiants en attente")
     Statutcompt.findAll({
             where: { nom: "attente" },
             attributes: { exclude: ["createdAt", "updatedAt"] },
@@ -663,8 +664,10 @@ exports.nbreEtudiantEnAttent = async(req, res) => {
                     }
                     let idProfile = respos[0].id;
                     let idStatut = respo[0].id;
+                    console.log("id profile : ",idProfile)
+                    console.log("id statuts : ",idStatut)
                     NombreEtudiantStatut(idProfile, idStatut).then(resulat => {
-
+                    console.log("retour résultat SQL",resulat)
                         const message = 'Le resultat a bien été retrouvé.';
 
                         res.json({ statut: true, message, data: resulat })
@@ -729,7 +732,7 @@ exports.ListeCommandeNonRecup = async(req, res) => {
             }
         })
         .then(commande => {
-            console.log(commande)
+            //console.log(commande)
             if (!commande) {
                 const message = `un petit problème a été détecté 8.`
                 res.status(500).json({ "statut": false, message })

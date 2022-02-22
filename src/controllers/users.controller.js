@@ -140,6 +140,7 @@ exports.register = (req, res) => {
 
                                                     file = "images" + "-" + Date.now() + "." + extension;
                                                     // gestion des images
+                                                    console.log(file,"____1")
                                                     uploadPath = "./public/images/certificats/" + file;
                                                     userData.certi_scolarite = routeUpload.routeUpload() + "images/certificats/" + file;
 
@@ -426,6 +427,7 @@ exports.inscription = (req, res) => {
 
                                         file = "images" + "-" + Date.now() + "." + extension;
                                         // gestion des images
+                                        console.log(file,"____2")
                                         uploadPath = "./public/images/certificats/" + file;
                                         userData.certi_scolarite = routeUpload.routeUpload() + "images/certificats/" + file;
 
@@ -1090,6 +1092,20 @@ exports.updateStatutComptes = async(req, res) => {
                 });
         }); */
 };
+
+
+exports.restrinUser = async(req, res) => {
+    // Aucune information à traiter
+    if (!req.body.id) {
+        return res
+            .status(400)
+            .json({
+                message: "Erreur. Merci de remplir tous les champs obligatoires ",
+            });
+    }
+    console.log("restrin")
+}
+
 
 // upadate statut compte user via l'admin
 exports.deleteUser = async(req, res) => {

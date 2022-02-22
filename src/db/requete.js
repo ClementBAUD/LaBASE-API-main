@@ -28,7 +28,7 @@ const listeUsersAdmin = () => {
 
 // liste des users par magasin
 const listeUserMAg = (idmagasin, idprofile) => {
-    const sql = ` SELECT users.id,users.nom,users.prenom,users.email,usM.magasinId,users.tel,users.adresse
+    const sql = ` SELECT users.id,users.nom,users.prenom,users.email,usM.magasinId,users.tel,users.adresse,users.restrin
     FROM 
     user_magasins  usM
     inner join magasins mg on mg.id =usM.magasinId
@@ -46,7 +46,7 @@ const listeUserAll = (idprofile) => {
 
         const sql = ` 
         SELECT 
-             usM.magasinId,mg.nom as nomMag, usrs.id as userId, usrs.nom as nomUser,usrs.prenom ,usrs.email,usrs.certi_scolarite,usrs.tel,sta.nom as nomStatut
+             usM.magasinId,mg.nom as nomMag, usrs.id as userId, usrs.nom as nomUser,usrs.prenom ,usrs.email,usrs.certi_scolarite,usrs.tel,sta.nom as nomStatut,usrs.restrin as restrin
         FROM 
             user_magasins  usM
             inner join magasins mg on mg.id =usM.magasinId

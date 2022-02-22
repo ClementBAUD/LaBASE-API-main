@@ -145,9 +145,9 @@ const initDb = () => {
                 }).then()
         })
 
-
-        console.log('*** /!\ La base de donnée a été initialisée /!\ ***');
 */
+        //console.log('*** /!\ La base de donnée a été initialisée /!\ ***');
+
         console.log('La base de donnée est connectée');
     })
 }
