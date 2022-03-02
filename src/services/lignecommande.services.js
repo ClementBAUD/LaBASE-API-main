@@ -1,6 +1,8 @@
 const express = require("express");
 const { ligneCommande } = require("../db/sequelize");
+const { QuantiteProduit } = require("../db/requete");
 const commandeService = require("../services/commande.services");
+
 
 module.exports = {
     getAllLigneCommande,
@@ -83,14 +85,15 @@ if(Tableo == undefined || NumCommande == undefined) {
 
 
 
-function verifQuantCommande (req, res,next)  {
+async function verifQuantCommande (req, res,next)  {
  let Tableo = new Array()
  Tableo = req.body.tab
+ //console.log("Tab",Tableo)
  let NumCommande = parseInt(req.body.NumCommande)//On Recupère le num commande
  let bPretAEnregistrer = true;//Initialisation du booléen
  let i = 0;
 /////////////////////////////////////////////////////
- while (i < Tableo.length && bPretAEnregistrer) {
+ while (i < Tableo.length) {
     let element = Tableo[i]
     ///////////////////////////////////////////////////
     const tabligneCommandes = {
@@ -99,24 +102,41 @@ function verifQuantCommande (req, res,next)  {
         commandeId: NumCommande, //permet de recuperer le num commande
     };
     ///////////////////////////////////////////////////
-    let quantActuel = element.quantiteActuel
-    // Vérification si QteACommander <= Stock Dispo
+    let nomProd = element.libelle
+    let IdProdPanier = element.id_prodDispo
+    let quantActuel
+
+    await QuantiteProduit(IdProdPanier).then(element => {
+    quantActuel = element[0].quantiteProd
+
     if (tabligneCommandes.quantite <= quantActuel) {// La quantité est bonne
         //bPretAEnregistrer = true
     }else { //Quantité pas bonne
         if (tabligneCommandes.quantite > quantActuel) {//On verfie quel produit est en quantité faible
             bPretAEnregistrer = false;//On passe le booléen à false pour éviter la suite de l'execution
             commandeService.deleteCommand(tabligneCommandes.commandeId)//Supression commande
-            .then((Datas) => {
-                const message = `La quantitée du produit ${element.libelle} demandée est supérieure à la quantitée restante`;// On affiche le message pour l'utilisaeur
-                res.status(500).json({ statut: false, message });
+            .then((error) => {
+                const message = `Le produit  ${nomProd} n'a pas pu être ajouté à votre panier.
+                Quantité maximale atteinte pour cet article.
+                `;// On affiche le message pour l'utilisaeur
+                res.status(500).json({ statut: false, message, error: error });
+                /*
+                res.toastr.error(
+                    `La quantitée du produit ${nomProd} demandée est supérieure à la quantitée restante`
+                );*/
+
+
             })
+            /*
             .catch((error) => {
                 const message = "La commande n'a pas pu être supprimé.";
                 res.status(500).json({ statut: false, message, error: error });
-            });    
+            });    */
         }
     }
+
+})
+
     i++; //On incrémente pour parcourir le tableau
  }
 //Partie pour bloquer ou next la method
@@ -127,7 +147,7 @@ if(bPretAEnregistrer == undefined || Tableo == undefined) {
     }else if (bPretAEnregistrer == false) {
         //on bloque
     }
-    else {  
+    else {
     next();
     return;        
     }

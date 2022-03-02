@@ -18,7 +18,7 @@ const MisADispo = require("../services/MisADispo.services");
 const { EnvoiMailCreationCommande } = require("../services/mail.services");
 const { table } = require("console");
 const { nextTick } = require("process");
-
+const { QuantiteProduit } = require("../db/requete");
 /**
  * méthode de création des commandes
  */
@@ -92,12 +92,22 @@ const ligneCommandes = {
 let idProduit = element.id_prodDispo;
 ///////////////////////////////////////////////////
 await MisADispo.getProduitDispo(idProduit)
-    .then(async(data) => {
-        let quantActuel = data.quantiteActuel; 
+    .then((data) => {
+        
+        //let quantActuel = data.quantiteActuel;
+        let IdProdPanier = idProduit
+        let quantBDDActuel
+
+        QuantiteProduit(IdProdPanier).then(element => {
+        quantBDDActuel = element[0].quantiteProd
         let quantPris = ligneCommandes.quantite;
-        let quantApresCommande = quantActuel - quantPris;
+        //console.log("quantPris",quantPris)
+        let quantApresCommande = quantBDDActuel - quantPris;
+        //console.log("quantApresCommande", quantApresCommande)
         let paramsQuant = {quantiteActuel:quantApresCommande}
-        await MisADispo.updateProduitDispo(idProduit, paramsQuant)
+        //console.log("paramsQuant", paramsQuant)
+
+         MisADispo.updateProduitDispo(idProduit, paramsQuant)
             .then(async(datamisea) => {
                 ligneCommande
                 .create(ligneCommandes)
@@ -113,6 +123,7 @@ await MisADispo.getProduitDispo(idProduit)
                 const message = "Impossible d'enregistrer la commande car le stock n'a pas pu être mis à jour.";
                 res.status(500).json({ statut: false, message, error });
                 });
+            })
     })
     .catch((error) => {
         const message = "Impossible d'enregistrer la commande car le stock n'a pas pu être récupérée.";

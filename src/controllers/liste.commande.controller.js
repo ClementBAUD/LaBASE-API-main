@@ -664,10 +664,10 @@ exports.nbreEtudiantEnAttent = async(req, res) => {
                     }
                     let idProfile = respos[0].id;
                     let idStatut = respo[0].id;
-                    console.log("id profile : ",idProfile)
-                    console.log("id statuts : ",idStatut)
+                    //console.log("id profile : ",idProfile)
+                    //console.log("id statuts : ",idStatut)
                     NombreEtudiantStatut(idProfile, idStatut).then(resulat => {
-                    console.log("retour résultat SQL",resulat)
+                    //console.log("retour résultat SQL",resulat)
                         const message = 'Le resultat a bien été retrouvé.';
 
                         res.json({ statut: true, message, data: resulat })

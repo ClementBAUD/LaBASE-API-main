@@ -776,12 +776,14 @@ exports.login = (req, res) => {
 
 // UPDATE user sans password
 exports.updateUser = async(req, res) => {
+    console.log("debut updateUser")
     // Aucune information à traiter
     if (!req.body.idUser ||
         !req.body.nom ||
         !req.body.prenom ||
         !req.body.email ||
-        !req.body.tel
+        !req.body.tel ||
+        !req.body.restreint
 
     ) {
         return res
@@ -796,7 +798,7 @@ exports.updateUser = async(req, res) => {
         nom: req.body.nom,
         tel: req.body.tel,
         email: req.body.email,
-
+        restreint: req.body.restreint
 
     };
     /*   const resv = Recup(userId, "users", "PUT")
@@ -811,6 +813,7 @@ exports.updateUser = async(req, res) => {
                 prenom: user.prenom,
                 nom: user.nom,
                 certi_scolarite: user.certi_scolarite,
+                restreint: user.restreint
             };
             const message = "Un utilisateur a bien été modifié.";
 
@@ -1041,6 +1044,7 @@ exports.updateUserPassword = async(req, res) => {
 // update statut compte user et la date d'experiation du compte via l'admin
 exports.updateStatutComptes = async(req, res) => {
     // Aucune information à traiter
+    
     if (!req.body.idUser || !req.body.id || !req.body.StatutcomptId || !req.body.dateExp) {
         return res
             .status(400)
@@ -1094,17 +1098,70 @@ exports.updateStatutComptes = async(req, res) => {
 };
 
 
-exports.restrinUser = async(req, res) => {
+exports.restreintUser = (req, res) => {
+    console.log("debut suivant route restreint")
     // Aucune information à traiter
-    if (!req.body.id) {
+    
+    console.log(req.body.idUser)
+
+
+
+    if (!req.body.idUser ||
+        !req.body.nom ||
+        !req.body.prenom ||
+        !req.body.email ||
+        !req.body.tel||
+        !req.body.restreint
+
+    ) {
         return res
             .status(400)
             .json({
                 message: "Erreur. Merci de remplir tous les champs obligatoires ",
             });
     }
-    console.log("restrin")
+    userId = req.body.idUser;
+    const userDataRestreint = {
+        prenom: req.body.prenom,
+        nom: req.body.nom,
+        tel: req.body.tel,
+        email: req.body.email,
+        restreint: req.body.restreint
+    };
+    /*   const resv = Recup(userId, "users", "PUT")
+          .then((resultat) => {
+              if (resultat[0].res > 0) { */
+    userService
+        .updateuser(userId, userDataRestreint)
+        .then((user) => {
+            const userData = {
+                id: user.id,
+                email: user.email,
+                prenom: user.prenom,
+                nom: user.nom,
+                certi_scolarite: user.certi_scolarite,
+                restreint: user.restreint
+            };
+            const message = "Un utilisateur a bien été modifié.";
+
+            res.json({ statut: true, message, data: userData });
+        })
+        .catch((error) => {
+            const message = `L'utilisateur n'a pas pu être modifié. Réessayez dans quelques instants.`;
+            res.status(500).json({ statut: false, message, data: error });
+        });
+
+
 }
+
+
+
+
+
+
+
+
+
 
 
 // upadate statut compte user via l'admin

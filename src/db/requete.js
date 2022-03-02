@@ -28,7 +28,7 @@ const listeUsersAdmin = () => {
 
 // liste des users par magasin
 const listeUserMAg = (idmagasin, idprofile) => {
-    const sql = ` SELECT users.id,users.nom,users.prenom,users.email,usM.magasinId,users.tel,users.adresse,users.restrin
+    const sql = ` SELECT users.id,users.nom,users.prenom,users.email,usM.magasinId,users.tel,users.adresse,users.restreint
     FROM 
     user_magasins  usM
     inner join magasins mg on mg.id =usM.magasinId
@@ -46,7 +46,7 @@ const listeUserAll = (idprofile) => {
 
         const sql = ` 
         SELECT 
-             usM.magasinId,mg.nom as nomMag, usrs.id as userId, usrs.nom as nomUser,usrs.prenom ,usrs.email,usrs.certi_scolarite,usrs.tel,sta.nom as nomStatut,usrs.restrin as restrin
+             usM.magasinId,mg.nom as nomMag, usrs.id as userId, usrs.nom as nomUser,usrs.prenom ,usrs.email,usrs.certi_scolarite,usrs.tel,sta.nom as nomStatut,usrs.restreint as restreint
         FROM 
             user_magasins  usM
             inner join magasins mg on mg.id =usM.magasinId
@@ -300,6 +300,21 @@ const nbMagasinUser =(tabIdUser) => {
     return sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
 }
 
+const QuantiteProduit = (idproduit) => {
+    const sql = `SELECT 
+                quantiteActuel as quantiteProd
+            FROM 
+                miseadispos
+            WHERE
+                miseadispos.id = ${idproduit}       
+    `
+    return sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
+}
+
+
+
+
+
 module.exports = {
     Recup,
     listeUserMAg,
@@ -316,5 +331,6 @@ module.exports = {
     DetailUser,
     autreFnt,
     nbMagasinUser,
-    listeUsersAdmin
+    listeUsersAdmin,
+    QuantiteProduit
 }

@@ -42,7 +42,7 @@ router.put('/certificat', controllerUser.updateCertificat);
 router.put('/updateStatutComptes', auth, controllerUser.updateStatutComptes);
 
 //restrin
-router.post('/restrinUser', auth, controllerUser.restrinUser);
+router.get('/restreintUser', auth, controllerUser.restreintUser);
 
 
 //delete

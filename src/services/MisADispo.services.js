@@ -13,8 +13,9 @@ module.exports = {
 
 async function updateProduitDispo(id, params) {
     const Pdispo = await getProduitDispo(id);
+    //console.log("update prod")
     //console.log("id,",id)
-   // console.log("params",params)
+    //console.log("params",params)
      Object.assign(Pdispo, params);
      await Pdispo.save();
  
